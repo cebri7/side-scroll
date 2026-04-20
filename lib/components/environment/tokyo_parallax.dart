@@ -10,16 +10,16 @@ class TokyoParallax extends PositionComponent {
           size: Vector2(GameConfig.gameWidth, GameConfig.gameHeight),
         );
 
-  double _farOffset = 0;
-  double _midOffset = 0;
-  double _nearOffset = 0;
+  double _farScroll = 0;
+  double _midScroll = 0;
+  double _nearScroll = 0;
 
   @override
   void update(double dt) {
     super.update(dt);
-    _farOffset = (_farOffset + 10 * dt) % 56;
-    _midOffset = (_midOffset + 22 * dt) % 72;
-    _nearOffset = (_nearOffset + 38 * dt) % 96;
+    _farScroll += 10 * dt;
+    _midScroll += 22 * dt;
+    _nearScroll += 38 * dt;
   }
 
   @override
@@ -58,7 +58,7 @@ class TokyoParallax extends PositionComponent {
       baseline: 170,
       width: 28,
       heightStep: 14,
-      offset: _farOffset,
+      scroll: _farScroll,
       accentEvery: 7,
       accentPaint: accentPaint,
     );
@@ -69,7 +69,7 @@ class TokyoParallax extends PositionComponent {
       baseline: 224,
       width: 36,
       heightStep: 18,
-      offset: _midOffset,
+      scroll: _midScroll,
       accentEvery: 5,
       accentPaint: accentPaint,
     );
@@ -80,7 +80,7 @@ class TokyoParallax extends PositionComponent {
       baseline: 276,
       width: 48,
       heightStep: 24,
-      offset: _nearOffset,
+      scroll: _nearScroll,
       accentEvery: 4,
       accentPaint: accentPaint,
     );
@@ -103,17 +103,21 @@ class TokyoParallax extends PositionComponent {
     required double baseline,
     required double width,
     required double heightStep,
-    required double offset,
+    required double scroll,
     required int accentEvery,
   }) {
-    var x = -offset - width;
-    var index = 0;
+    final localOffset = scroll % width;
+    final startIndex = (scroll / width).floor() - 1;
+    var x = -localOffset - width;
+    var index = startIndex;
+
     while (x < size.x + width) {
-      final height = 36 + (index % 5) * heightStep;
+      final heightTier = _positiveModulo(index, 5);
+      final height = 36 + heightTier * heightStep;
       final rect = Rect.fromLTWH(x, baseline - height, width - 3, height);
       canvas.drawRect(rect, paint);
 
-      if (index % accentEvery == 0) {
+      if (_positiveModulo(index, accentEvery) == 0) {
         canvas.drawRect(
           Rect.fromLTWH(x + (width * 0.5) - 2, baseline - height - 18, 4, 18),
           accentPaint,
@@ -138,6 +142,10 @@ class TokyoParallax extends PositionComponent {
       x += width;
       index += 1;
     }
+  }
+
+  int _positiveModulo(int value, int divisor) {
+    return ((value % divisor) + divisor) % divisor;
   }
 }
 

@@ -6,12 +6,16 @@ import 'package:flutter/material.dart';
 
 import '../../config/game_config.dart';
 import '../obstacles/obstacle.dart';
+import '../environment/road_profile.dart';
 import '../../game/clementine_game.dart';
 import '../../systems/game_state.dart';
 import 'player_state.dart';
 
 class Player extends PositionComponent
   with HasGameReference<ClementineGame>, CollisionCallbacks {
+  static const double _roadContactScreenOffsetX = 45;
+  static const double _roadContactAnchorOffsetY = 6;
+
   Player()
       : super(
           priority: 10,
@@ -64,15 +68,23 @@ class Player extends PositionComponent
   }
 
   double get groundY =>
-      GameConfig.gameHeight - GameConfig.groundHeight + GameConfig.playerGroundInset;
+      RoadProfile.surfaceYAtScreenX(
+        scrollDistance: game.scrollDistance,
+        screenX: position.x + _roadContactScreenOffsetX,
+        ) +
+      _roadContactAnchorOffsetY;
 
-  bool get isGrounded => position.y >= groundY;
+  bool get isGrounded => position.y >= groundY - 0.5;
 
   @override
   void update(double dt) {
     super.update(dt);
 
-    if (!isGrounded || _verticalVelocity != 0) {
+    final groundedBeforeStep = isGrounded && _verticalVelocity == 0;
+
+    if (groundedBeforeStep) {
+      position.y = groundY;
+    } else {
       _verticalVelocity += GameConfig.playerGravity * dt;
       position.y += _verticalVelocity * dt;
 
@@ -147,10 +159,11 @@ class Player extends PositionComponent
     final bodyBob = state == PlayerState.riding ? math.sin(_pedalTime * 2) * 1.5 : 0.0;
     final jumpLift = state == PlayerState.jumping ? -4.0 : 0.0;
     final torsoY = 13 + bodyBob + jumpLift;
+    final roadSlope = RoadProfile.slopeAngleAtWorldX(game.scrollDistance + position.x + 34);
     final frameTilt = switch (state) {
       PlayerState.jumping => -0.14,
       PlayerState.crashed => 0.3,
-      _ => 0.0,
+      _ => roadSlope * 0.6,
     };
 
     canvas.save();

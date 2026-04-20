@@ -5,6 +5,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 import '../../config/game_config.dart';
+import '../environment/road_profile.dart';
 import '../../game/clementine_game.dart';
 
 class Obstacle extends PositionComponent with HasGameReference<ClementineGame> {
@@ -46,6 +47,11 @@ class Obstacle extends PositionComponent with HasGameReference<ClementineGame> {
   void update(double dt) {
     super.update(dt);
     position.x -= game.scrollSpeed * dt;
+    position.y = RoadProfile.surfaceYAtScreenX(
+          scrollDistance: game.scrollDistance,
+          screenX: position.x,
+        ) +
+        GameConfig.obstacleGroundInset;
     if (position.x + size.x < -32) {
       removeFromParent();
     }

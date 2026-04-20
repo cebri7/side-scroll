@@ -1,5 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'game/clementine_game.dart';
 import 'overlays/game_over_overlay.dart';
@@ -7,8 +8,15 @@ import 'overlays/hud_overlay.dart';
 import 'overlays/main_menu_overlay.dart';
 import 'overlays/pause_overlay.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersiveSticky,
+  );
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   runApp(const MainApp());
 }
 

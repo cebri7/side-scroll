@@ -29,6 +29,7 @@ class ClementineGame extends FlameGame<ClementineWorld>
   GameState gameState = GameState.menu;
   double distance = 0;
   double scrollSpeed = GameConfig.baseScrollSpeed;
+  double scrollDistance = 0;
 
   @override
   Color backgroundColor() => const Color(0xFF08111F);
@@ -45,6 +46,7 @@ class ClementineGame extends FlameGame<ClementineWorld>
     if (gameState == GameState.playing) {
       scrollSpeed = (scrollSpeed + GameConfig.speedRampPerSecond * dt)
           .clamp(GameConfig.baseScrollSpeed, GameConfig.maxScrollSpeed);
+      scrollDistance += scrollSpeed * dt;
       distance += scrollSpeed * dt * 0.1;
       notifyListeners();
     }
@@ -54,6 +56,7 @@ class ClementineGame extends FlameGame<ClementineWorld>
   void startGame() {
     distance = 0;
     scrollSpeed = GameConfig.baseScrollSpeed;
+    scrollDistance = 0;
     gameState = GameState.playing;
     world.resetRun();
     overlays
